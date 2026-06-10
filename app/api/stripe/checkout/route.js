@@ -17,8 +17,16 @@ export async function POST(req) {
       where: { userId: session.user.id },
     });
 
-    // Créer ou récupérer le customer Stripe
+    // Créer ou récupérer le customer Stripe (auto-réparation si périmé/invalide)
     let customerId = acheteur.stripeCustomerId;
+    if (customerId) {
+      try {
+        const existing = await stripe.customers.retrieve(customerId);
+        if (existing.deleted) customerId = null;
+      } catch (e) {
+        customerId = null; // customer inexistant dans ce compte/mode Stripe
+      }
+    }
     if (!customerId) {
       const customer = await stripe.customers.create({
         email: session.user.email,
@@ -39,13 +47,13 @@ export async function POST(req) {
         price: process.env.STRIPE_PRICE_ABONNEMENT,
         quantity: 1,
       }],
-      success_url: `${process.env.NEXTAUTH_URL}/dashboard/acheteur?abonnement=success`,
+      success_url: `${process.env.NEXTAUTH_URL}/dashboard/acheteur/forfait?abonnement=success`,
       cancel_url: `${process.env.NEXTAUTH_URL}/dashboard/acheteur/forfait`,
     });
 
     return NextResponse.json({ url: checkoutSession.url });
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+    return NextResponse.json({ error: e.message }, { status: 500 });
   }
 }

@@ -155,7 +155,7 @@ export default function CGVPage() {
             <p style={{ fontSize: 15, fontWeight: 700, color: "#141414", margin: "0 0 8px" }}>Une question sur nos CGV ?</p>
             <p style={{ fontSize: 13, color: "#6B7280", margin: "0 0 20px" }}>Notre équipe est disponible pour répondre à vos questions juridiques.</p>
             <Link href="/contact" style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#141414", color: "#fff", padding: "11px 22px", borderRadius: 10, fontSize: 13, fontWeight: 700, textDecoration: "none" }}>
-              Nous contactper →
+              Nous contacter →
             </Link>
           </div>
         </div>

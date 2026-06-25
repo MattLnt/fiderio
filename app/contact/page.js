@@ -45,6 +45,7 @@ export default function ContactPage() {
   const [form, setForm] = useState({ nom: "", email: "", sujet: "", message: "" });
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState("");
 
   const sujets = [
     { value: "question-generale", label: "Question générale" },
@@ -58,9 +59,22 @@ export default function ContactPage() {
   async function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
-    await new Promise(r => setTimeout(r, 1000));
+    setError("");
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (res.ok) {
+        setSent(true);
+      } else {
+        setError("Une erreur est survenue. Veuillez réessayer.");
+      }
+    } catch {
+      setError("Une erreur est survenue. Veuillez réessayer.");
+    }
     setLoading(false);
-    setSent(true);
   }
 
   const inputStyle = {
@@ -126,6 +140,11 @@ export default function ContactPage() {
               </div>
             ) : (
               <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+                {error && (
+                  <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 10, padding: "12px 16px", color: "#DC2626", fontSize: 13 }}>
+                    {error}
+                  </div>
+                )}
                 <div className="contact-form-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                   <div>
                     <label style={labelStyle}>Nom *</label>

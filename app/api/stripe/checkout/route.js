@@ -13,6 +13,12 @@ export async function POST(req) {
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
     }
 
+    // Origine réelle de la requête (le domaine que l'utilisateur visite vraiment).
+    // On évite ainsi tout mismatch avec NEXTAUTH_URL qui ferait perdre la session.
+    const origin =
+      req.headers.get("origin") ||
+      (req.headers.get("host") ? `https://${req.headers.get("host")}` : process.env.NEXTAUTH_URL);
+
     const acheteur = await prisma.acheteur.findUnique({
       where: { userId: session.user.id },
     });
@@ -47,8 +53,8 @@ export async function POST(req) {
         price: process.env.STRIPE_PRICE_ABONNEMENT,
         quantity: 1,
       }],
-      success_url: `${process.env.NEXTAUTH_URL}/dashboard/acheteur/forfait?abonnement=success`,
-      cancel_url: `${process.env.NEXTAUTH_URL}/dashboard/acheteur/forfait`,
+      success_url: `${origin}/dashboard/acheteur/forfait?abonnement=success`,
+      cancel_url: `${origin}/dashboard/acheteur/forfait`,
     });
 
     return NextResponse.json({ url: checkoutSession.url });

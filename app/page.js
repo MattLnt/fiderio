@@ -34,7 +34,7 @@ export default function HomePage() {
 
         {/* Hero avec photo */}
         <div className="hero-section" style={{ background: "#141414", padding: "130px 48px 90px", position: "relative", overflow: "hidden" }}>
-          <Image src="/images/hero-bg.jpg" alt="" fill priority sizes="100vw"
+          <Image src="/vitaly-gariev-hPDJdl8mfI8-unsplash.jpg" alt="" fill priority sizes="100vw"
             style={{ objectFit: "cover", objectPosition: "center 30%" }} />
           <div style={{ position: "absolute", inset: 0, background: "linear-gradient(95deg, rgba(20,20,20,0.97) 0%, rgba(20,20,20,0.88) 45%, rgba(20,20,20,0.55) 100%)" }} />
 

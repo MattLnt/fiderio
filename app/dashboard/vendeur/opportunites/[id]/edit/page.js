@@ -65,6 +65,7 @@ export default function EditOpportunitePage({ params }) {
           venteImmeuble: data.venteImmeuble ?? null,
           valeurImmeuble: data.valeurImmeuble ?? "",
           logiciels: data.logiciels || "",
+          adressesComplementaires: (data.adressesComplementaires && data.adressesComplementaires.length > 0) ? data.adressesComplementaires : [""],
         });
       }
       setFetching(false);
@@ -80,10 +81,19 @@ export default function EditOpportunitePage({ params }) {
     setForm(prev => {
       const has = prev.typeDeal.includes(val);
       const typeDeal = has ? prev.typeDeal.filter(v => v !== val) : [...prev.typeDeal, val];
-      // Si on décoche VENTE, on réinitialise les champs spécifiques vente
       const extra = (val === "VENTE" && has) ? { montantRevente: "", typeVente: "" } : {};
       return { ...prev, typeDeal, ...extra };
     });
+  }
+
+  function addAdresse() {
+    setForm(prev => ({ ...prev, adressesComplementaires: [...prev.adressesComplementaires, ""] }));
+  }
+  function updateAdresse(idx, val) {
+    setForm(prev => { const arr = [...prev.adressesComplementaires]; arr[idx] = val; return { ...prev, adressesComplementaires: arr }; });
+  }
+  function removeAdresse(idx) {
+    setForm(prev => ({ ...prev, adressesComplementaires: prev.adressesComplementaires.filter((_, i) => i !== idx) }));
   }
 
   const isVente = form?.typeDeal?.includes("VENTE");
@@ -104,6 +114,7 @@ export default function EditOpportunitePage({ params }) {
         valeurImmeuble: form.venteImmeuble === true && form.valeurImmeuble ? parseInt(form.valeurImmeuble) : null,
         montantRevente: isVente && form.montantRevente ? form.montantRevente : null,
         typeVente: isVente && form.typeVente ? form.typeVente : null,
+        adressesComplementaires: form.adressesComplementaires.filter(a => a.trim() !== ""),
       }),
     });
     const data = await res.json();
@@ -166,11 +177,33 @@ export default function EditOpportunitePage({ params }) {
         <div className="edit-grid" style={{ display: "grid", gridTemplateColumns: "1fr 260px", gap: 16, alignItems: "start" }}>
           <div>
 
-            {/* Province */}
+            {/* Province + bureaux */}
             <div style={sectionStyle}>
               {sectionHeader(<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>, "Localisation", "Province du cabinet")}
               <label style={labelStyle}>Province *</label>
               <CustomSelect value={form.province} onChange={val => setForm({ ...form, province: val })} options={PROVINCES} placeholder="Sélectionner" />
+
+              <div style={{ marginTop: 16 }}>
+                <label style={{ ...labelStyle, marginBottom: 10 }}>Bureaux supplémentaires</label>
+                {form.adressesComplementaires.map((addr, idx) => (
+                  <div key={idx} style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+                    <input type="text" value={addr} onChange={e => updateAdresse(idx, e.target.value)}
+                      placeholder={`Adresse bureau ${idx + 1}`}
+                      style={{ ...inputStyle, flex: 1 }}
+                      onFocus={e => e.target.style.borderColor = "#FF5A1F"}
+                      onBlur={e => e.target.style.borderColor = "#E5E7EB"} />
+                    {form.adressesComplementaires.length > 1 && (
+                      <button type="button" onClick={() => removeAdresse(idx)}
+                        style={{ padding: "0 12px", borderRadius: 10, border: "1.5px solid #FECACA", background: "#FEF2F2", color: "#DC2626", cursor: "pointer", fontSize: 18, flexShrink: 0 }}>×</button>
+                    )}
+                  </div>
+                ))}
+                <button type="button" onClick={addAdresse}
+                  style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 9, border: "1.5px dashed #E5E7EB", background: "transparent", color: "#6B7280", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  Ajouter un bureau
+                </button>
+              </div>
             </div>
 
             {/* Activités */}
@@ -366,6 +399,7 @@ export default function EditOpportunitePage({ params }) {
                   ...(isVente && form.typeVente ? [{ label: "Type de vente", value: typeVenteLabels[form.typeVente] }] : []),
                   { label: "Dirigeant", value: { OUI: "Oui", OUI_PROVISOIRE: "Provisoire", NON: "Non" }[form.presenceDirigeant] || "—" },
                   ...(form.venteImmeuble === true && form.valeurImmeuble ? [{ label: "Immobilier", value: `${parseInt(form.valeurImmeuble).toLocaleString("fr-BE")} €` }] : []),
+                  ...(form.adressesComplementaires.filter(a => a.trim()).length > 0 ? [{ label: "Bureaux suppl.", value: form.adressesComplementaires.filter(a => a.trim()).length }] : []),
                   { label: "Logiciels", value: form.logiciels || "—" },
                 ].map(item => (
                   <div key={item.label} style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid #F9FAFB" }}>

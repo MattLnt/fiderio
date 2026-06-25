@@ -4,6 +4,10 @@ import { useRouter } from "next/navigation";
 
 const PROVINCES = ["Anvers", "Bruxelles", "Flandre orientale", "Flandre occidentale", "Brabant flamand", "Brabant wallon", "Hainaut", "Liège", "Luxembourg", "Namur", "Limbourg"];
 const ACTIVITES = ["Comptabilité", "Fiscalité", "Création d'entreprise", "Gestion salariale", "Transmission d'entreprise", "Juridique", "Autre"];
+const MONTANT_REVENTE_OPTIONS = [
+  "0 – 100 k€", "100 – 250 k€", "250 – 500 k€", "500 k€ – 1 M€",
+  "1 – 2 M€", "2 – 3 M€", "3 – 4 M€", "4 – 5 M€", "+ 5 M€",
+];
 
 function CustomSelect({ value, onChange, options, placeholder }) {
   const [open, setOpen] = useState(false);
@@ -56,6 +60,8 @@ export default function EditOpportunitePage({ params }) {
           typeDeal: Array.isArray(data.typeDeal) ? data.typeDeal : [data.typeDeal],
           presenceDirigeant: data.presenceDirigeant,
           description: data.description || "",
+          montantRevente: data.montantRevente || "",
+          typeVente: data.typeVente || "",
           venteImmeuble: data.venteImmeuble ?? null,
           valeurImmeuble: data.valeurImmeuble ?? "",
           logiciels: data.logiciels || "",
@@ -71,8 +77,16 @@ export default function EditOpportunitePage({ params }) {
   }
 
   function toggleTypeDeal(val) {
-    setForm(prev => ({ ...prev, typeDeal: prev.typeDeal.includes(val) ? prev.typeDeal.filter(v => v !== val) : [...prev.typeDeal, val] }));
+    setForm(prev => {
+      const has = prev.typeDeal.includes(val);
+      const typeDeal = has ? prev.typeDeal.filter(v => v !== val) : [...prev.typeDeal, val];
+      // Si on décoche VENTE, on réinitialise les champs spécifiques vente
+      const extra = (val === "VENTE" && has) ? { montantRevente: "", typeVente: "" } : {};
+      return { ...prev, typeDeal, ...extra };
+    });
   }
+
+  const isVente = form?.typeDeal?.includes("VENTE");
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -88,6 +102,8 @@ export default function EditOpportunitePage({ params }) {
         nombreClients: parseInt(form.nombreClients),
         nombreCollaborateurs: parseInt(form.nombreCollaborateurs),
         valeurImmeuble: form.venteImmeuble === true && form.valeurImmeuble ? parseInt(form.valeurImmeuble) : null,
+        montantRevente: isVente && form.montantRevente ? form.montantRevente : null,
+        typeVente: isVente && form.typeVente ? form.typeVente : null,
       }),
     });
     const data = await res.json();
@@ -114,6 +130,7 @@ export default function EditOpportunitePage({ params }) {
   if (!form) return <div style={{ fontSize: 13, color: "#DC2626" }}>Opportunité introuvable.</div>;
 
   const isFormValid = form.province && form.chiffreAffaires && form.nombreClients && form.nombreCollaborateurs && form.typeDeal.length > 0 && form.presenceDirigeant && form.activites.length > 0;
+  const typeVenteLabels = { ACTION: "Vente d'actions", FONDS_DE_COMMERCE: "Vente de fonds de commerce" };
 
   return (
     <div style={{ maxWidth: "100%" }}>
@@ -127,6 +144,7 @@ export default function EditOpportunitePage({ params }) {
           .edit-chiffres { grid-template-columns: 1fr 1fr !important; }
           .edit-transaction { grid-template-columns: 1fr 1fr !important; }
           .edit-presence { grid-template-columns: 1fr 1fr 1fr !important; }
+          .edit-vente-grid { grid-template-columns: 1fr !important; }
           .edit-submit-mobile { display: flex !important; }
           .edit-header h1 { font-size: 20px !important; }
         }
@@ -200,6 +218,7 @@ export default function EditOpportunitePage({ params }) {
                   { value: "FUSION", label: "Fusion", desc: "Fusion avec un autre cabinet" },
                   { value: "OUVERTURE_CAPITAL", label: "Ouverture du capital", desc: "Entrée d'un associé" },
                   { value: "COLLABORATION", label: "Collaboration", desc: "Partenariat" },
+                  { value: "LIQUIDATION", label: "Liquidation", desc: "Cessation et liquidation" },
                 ].map(opt => {
                   const selected = form.typeDeal.includes(opt.value);
                   return (
@@ -216,6 +235,47 @@ export default function EditOpportunitePage({ params }) {
                   );
                 })}
               </div>
+
+              {/* Champs spécifiques VENTE */}
+              {isVente && (
+                <div style={{ background: "#FFF7ED", border: "1px solid #FED7AA", borderRadius: 12, padding: "16px", marginBottom: 20 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#EA580C" strokeWidth="2" style={{ flexShrink: 0 }}><path d="M3 3v18h18"/><path d="M18 9l-6 6-3-3-3 3"/></svg>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: "#C2410C", textTransform: "uppercase", letterSpacing: "0.04em" }}>Détails de la vente</span>
+                  </div>
+                  <div className="edit-vente-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+                    <div>
+                      <label style={labelStyle}>Montant de revente souhaité</label>
+                      <CustomSelect
+                        value={form.montantRevente}
+                        onChange={val => setForm({ ...form, montantRevente: val })}
+                        options={MONTANT_REVENTE_OPTIONS}
+                        placeholder="Sélectionner une tranche"
+                      />
+                    </div>
+                    <div>
+                      <label style={labelStyle}>Type de vente</label>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                        {[
+                          { value: "ACTION", label: "Vente d'actions" },
+                          { value: "FONDS_DE_COMMERCE", label: "Vente de fonds de commerce" },
+                        ].map(opt => {
+                          const sel = form.typeVente === opt.value;
+                          return (
+                            <button key={opt.value} type="button" onClick={() => setForm({ ...form, typeVente: opt.value })}
+                              style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", borderRadius: 10, cursor: "pointer", textAlign: "left", border: `1.5px solid ${sel ? "#FF5A1F" : "#E5E7EB"}`, background: sel ? "rgba(255,90,31,0.08)" : "#fff", transition: "all 0.15s" }}>
+                              <div style={{ width: 16, height: 16, borderRadius: "50%", border: `2px solid ${sel ? "#FF5A1F" : "#D1D5DB"}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                                {sel && <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#FF5A1F" }} />}
+                              </div>
+                              <span style={{ fontSize: 13, fontWeight: 600, color: sel ? "#C2410C" : "#374151" }}>{opt.label}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <label style={labelStyle}>Présence du dirigeant *</label>
               <div className="edit-presence" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
@@ -302,6 +362,8 @@ export default function EditOpportunitePage({ params }) {
                   { label: "Chiffre d'affaires", value: form.chiffreAffaires ? `${parseInt(form.chiffreAffaires).toLocaleString("fr-BE")} €` : "—" },
                   { label: "Clients", value: form.nombreClients || "—" },
                   { label: "Collab.", value: form.nombreCollaborateurs || "—" },
+                  ...(isVente && form.montantRevente ? [{ label: "Revente souhaitée", value: form.montantRevente }] : []),
+                  ...(isVente && form.typeVente ? [{ label: "Type de vente", value: typeVenteLabels[form.typeVente] }] : []),
                   { label: "Dirigeant", value: { OUI: "Oui", OUI_PROVISOIRE: "Provisoire", NON: "Non" }[form.presenceDirigeant] || "—" },
                   ...(form.venteImmeuble === true && form.valeurImmeuble ? [{ label: "Immobilier", value: `${parseInt(form.valeurImmeuble).toLocaleString("fr-BE")} €` }] : []),
                   { label: "Logiciels", value: form.logiciels || "—" },

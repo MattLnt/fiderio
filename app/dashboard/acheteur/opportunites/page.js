@@ -10,6 +10,11 @@ const formatTypeDeal = (typeDeal) => {
   return typeDeal.replace(/_/g, " ");
 };
 
+const MONTANT_REVENTE_OPTIONS = [
+  "0 – 100 k€", "100 – 250 k€", "250 – 500 k€", "500 k€ – 1 M€",
+  "1 – 2 M€", "2 – 3 M€", "3 – 4 M€", "4 – 5 M€", "+ 5 M€",
+];
+
 export default async function OpportunitesAcheteurPage({ searchParams }) {
   const session = await getServerSession(authOptions);
   const params = await searchParams;
@@ -30,6 +35,7 @@ export default async function OpportunitesAcheteurPage({ searchParams }) {
   const province = params?.province ? (Array.isArray(params.province) ? params.province : [params.province]) : [];
   const typeDeal = params?.typeDeal ? (Array.isArray(params.typeDeal) ? params.typeDeal : [params.typeDeal]) : [];
   const activite = params?.activite ? (Array.isArray(params.activite) ? params.activite : [params.activite]) : [];
+  const montantRevente = params?.montantRevente ? (Array.isArray(params.montantRevente) ? params.montantRevente : [params.montantRevente]) : [];
   const caMin = params?.caMin ? parseFloat(params.caMin) : null;
   const caMax = params?.caMax ? parseFloat(params.caMax) : null;
 
@@ -38,6 +44,7 @@ export default async function OpportunitesAcheteurPage({ searchParams }) {
     ...(province.length > 0 && { province: { in: province } }),
     ...(typeDeal.length > 0 && { typeDeal: { hasSome: typeDeal } }),
     ...(activite.length > 0 && { activites: { hasSome: activite } }),
+    ...(montantRevente.length > 0 && { montantRevente: { in: montantRevente } }),
     ...(caMin || caMax ? {
       chiffreAffaires: {
         ...(caMin && { gte: caMin }),
@@ -64,9 +71,10 @@ export default async function OpportunitesAcheteurPage({ searchParams }) {
     { value: "FUSION", label: "Fusion" },
     { value: "OUVERTURE_CAPITAL", label: "Ouverture du capital" },
     { value: "COLLABORATION", label: "Collaboration" },
+    { value: "LIQUIDATION", label: "Liquidation" },
   ];
 
-  const hasFilters = province.length > 0 || typeDeal.length > 0 || activite.length > 0 || caMin || caMax;
+  const hasFilters = province.length > 0 || typeDeal.length > 0 || activite.length > 0 || montantRevente.length > 0 || caMin || caMax;
 
   return (
     <div style={{ maxWidth: "100%" }}>
@@ -135,11 +143,13 @@ export default async function OpportunitesAcheteurPage({ searchParams }) {
               province={province}
               typeDeal={typeDeal}
               activite={activite}
+              montantRevente={montantRevente}
               caMin={caMin}
               caMax={caMax}
               provinces={provinces}
               deals={deals}
               activites={activites}
+              montantReventeOptions={MONTANT_REVENTE_OPTIONS}
               hasFilters={hasFilters}
             />
           </div>

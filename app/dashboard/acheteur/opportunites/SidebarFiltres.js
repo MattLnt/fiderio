@@ -111,12 +111,13 @@ function Section({ title, count, children, defaultOpen = false }) {
   )
 }
 
-export default function SidebarFiltres({ province, typeDeal, activite, caMin, caMax, provinces, deals, activites, hasFilters }) {
+export default function SidebarFiltres({ province, typeDeal, activite, montantRevente = [], caMin, caMax, provinces, deals, activites, montantReventeOptions = [], hasFilters }) {
   const router = useRouter()
 
   const provinceCount = province.length
   const typeCount = typeDeal.length
   const activiteCount = activite.length
+  const reventeCount = montantRevente.length
   const caCount = caMin || caMax ? 1 : 0
 
   return (
@@ -146,6 +147,12 @@ export default function SidebarFiltres({ province, typeDeal, activite, caMin, ca
       <Section title="Activité" count={activiteCount} defaultOpen={activiteCount > 0}>
         {activites.map(a => (
           <Switcher key={a} label={a} paramName="activite" value={a} isActive={activite.includes(a)} />
+        ))}
+      </Section>
+
+      <Section title="Montant de revente" count={reventeCount} defaultOpen={reventeCount > 0}>
+        {montantReventeOptions.map(m => (
+          <Switcher key={m} label={m} paramName="montantRevente" value={m} isActive={montantRevente.includes(m)} />
         ))}
       </Section>
 

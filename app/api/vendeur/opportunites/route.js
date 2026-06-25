@@ -29,6 +29,8 @@ export async function POST(req) {
         typeDeal: body.typeDeal,
         presenceDirigeant: body.presenceDirigeant,
         description: body.description || null,
+        montantRevente: body.montantRevente || null,
+        typeVente: body.typeVente || null,
         utiliseBrio: body.utiliseBrio ?? null,
         exclusiviteCompagnie: body.exclusiviteCompagnie ?? null,
         nomCompagnie: body.nomCompagnie || null,

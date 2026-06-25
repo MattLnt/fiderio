@@ -10,6 +10,11 @@ import MobileHeader from "./MobileHeader";
 import PublicBottomNav from "@/app/components/PublicBottomNav";
 import VueTracker from "./VueTracker";
 
+const MONTANT_REVENTE_OPTIONS = [
+  "0 – 100 k€", "100 – 250 k€", "250 – 500 k€", "500 k€ – 1 M€",
+  "1 – 2 M€", "2 – 3 M€", "3 – 4 M€", "4 – 5 M€", "+ 5 M€",
+];
+
 export default async function OpportunitesPubliquePage({ searchParams }) {
   const session = await getServerSession(authOptions);
   const params = await searchParams;
@@ -18,6 +23,8 @@ export default async function OpportunitesPubliquePage({ searchParams }) {
   const provinces = Array.isArray(provincesRaw) ? provincesRaw : provincesRaw ? [provincesRaw] : [];
   const typeDealsRaw = params?.typeDeal || [];
   const typeDeals = Array.isArray(typeDealsRaw) ? typeDealsRaw : typeDealsRaw ? [typeDealsRaw] : [];
+  const montantReventeRaw = params?.montantRevente || [];
+  const montantRevente = Array.isArray(montantReventeRaw) ? montantReventeRaw : montantReventeRaw ? [montantReventeRaw] : [];
   const caMin = params?.caMin ? parseFloat(params.caMin) : null;
   const caMax = params?.caMax ? parseFloat(params.caMax) : null;
 
@@ -25,6 +32,7 @@ export default async function OpportunitesPubliquePage({ searchParams }) {
     status: "ACTIVE",
     ...(provinces.length > 0 && { province: { in: provinces } }),
     ...(typeDeals.length > 0 && { typeDeal: { hasSome: typeDeals } }),
+    ...(montantRevente.length > 0 && { montantRevente: { in: montantRevente } }),
     ...(caMin || caMax ? {
       chiffreAffaires: {
         ...(caMin && { gte: caMin }),
@@ -63,10 +71,11 @@ export default async function OpportunitesPubliquePage({ searchParams }) {
     { value: "FUSION", label: "Fusion" },
     { value: "OUVERTURE_CAPITAL", label: "Ouverture du capital" },
     { value: "COLLABORATION", label: "Collaboration" },
+    { value: "LIQUIDATION", label: "Liquidation" },
   ];
 
-  const hasFilters = provinces.length > 0 || typeDeals.length > 0 || caMin || caMax;
-  const activeCount = (provinces.length > 0 ? 1 : 0) + (typeDeals.length > 0 ? 1 : 0) + (caMin || caMax ? 1 : 0);
+  const hasFilters = provinces.length > 0 || typeDeals.length > 0 || montantRevente.length > 0 || caMin || caMax;
+  const activeCount = (provinces.length > 0 ? 1 : 0) + (typeDeals.length > 0 ? 1 : 0) + (montantRevente.length > 0 ? 1 : 0) + (caMin || caMax ? 1 : 0);
   const province = provinces[0] || "";
   const typeDeal = typeDeals[0] || "";
 
@@ -138,6 +147,14 @@ export default async function OpportunitesPubliquePage({ searchParams }) {
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {deals.map(d => (
                 <OpportuniteSwitcher key={d.value} label={d.label} paramName="typeDeal" value={d.value} isActive={typeDeals.includes(d.value)} />
+              ))}
+            </div>
+          </div>
+          <div style={{ padding: "16px 20px", borderBottom: "1px solid #F9FAFB" }}>
+            <p style={{ fontSize: "11px", fontWeight: 600, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 12px" }}>Montant de revente</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {MONTANT_REVENTE_OPTIONS.map(m => (
+                <OpportuniteSwitcher key={m} label={m} paramName="montantRevente" value={m} isActive={montantRevente.includes(m)} />
               ))}
             </div>
           </div>

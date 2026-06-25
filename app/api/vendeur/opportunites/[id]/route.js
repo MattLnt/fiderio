@@ -44,6 +44,8 @@ export async function PATCH(req, { params }) {
     if (body.typeDeal !== undefined) data.typeDeal = body.typeDeal;
     if (body.presenceDirigeant !== undefined) data.presenceDirigeant = body.presenceDirigeant;
     if (body.description !== undefined) data.description = body.description;
+    if (body.montantRevente !== undefined) data.montantRevente = body.montantRevente;
+    if (body.typeVente !== undefined) data.typeVente = body.typeVente;
     if (body.utiliseBrio !== undefined) data.utiliseBrio = body.utiliseBrio;
     if (body.exclusiviteCompagnie !== undefined) data.exclusiviteCompagnie = body.exclusiviteCompagnie;
     if (body.nomCompagnie !== undefined) data.nomCompagnie = body.nomCompagnie;

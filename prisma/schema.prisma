@@ -25,6 +25,7 @@ enum TypeDeal {
   FUSION
   OUVERTURE_CAPITAL
   COLLABORATION
+  LIQUIDATION
 }
 
 enum PresenceDirigeant {
@@ -105,6 +106,9 @@ model Opportunite {
   presenceDirigeant    PresenceDirigeant
   description          String?
   logiciels            String?
+
+  montantRevente       String?
+  typeVente            String?
 
   utiliseBrio              Boolean?
   exclusiviteCompagnie     Boolean?

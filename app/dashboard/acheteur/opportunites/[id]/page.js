@@ -11,6 +11,11 @@ const formatTypeDeal = (typeDeal) => {
   return typeDeal.replace(/_/g, " ");
 };
 
+const TYPE_VENTE_LABELS = {
+  ACTION: "Vente d'actions",
+  FONDS_DE_COMMERCE: "Vente de fonds de commerce",
+};
+
 export default async function OpportuniteDetailPage({ params }) {
   const { id } = await params;
   const session = await getServerSession(authOptions);
@@ -42,6 +47,7 @@ export default async function OpportuniteDetailPage({ params }) {
   }
 
   const pointsDeVente = (opportunite.adressesComplementaires || []).filter(a => a.trim());
+  const isVente = Array.isArray(opportunite.typeDeal) && opportunite.typeDeal.includes("VENTE");
 
   return (
     <div style={{ maxWidth: "100%" }}>
@@ -102,6 +108,19 @@ export default async function OpportuniteDetailPage({ params }) {
                 </div>
               ))}
             </div>
+
+            {/* Montant de revente souhaité — mis en avant si VENTE */}
+            {isVente && opportunite.montantRevente && (
+              <div style={{ marginTop: 12, background: "rgba(255,90,31,0.06)", border: "1px solid rgba(255,90,31,0.2)", borderRadius: 12, padding: "16px 18px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <div style={{ width: 32, height: 32, borderRadius: 8, background: "rgba(255,90,31,0.12)", display: "flex", alignItems: "center", justifyContent: "center", color: "#FF5A1F", flexShrink: 0 }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                  </div>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: "#C2410C" }}>Montant de revente souhaité</span>
+                </div>
+                <span style={{ fontSize: 16, fontWeight: 700, color: "#FF5A1F" }}>{opportunite.montantRevente}</span>
+              </div>
+            )}
           </div>
 
           {/* Détails */}
@@ -110,6 +129,8 @@ export default async function OpportuniteDetailPage({ params }) {
             <div style={{ display: "flex", flexDirection: "column" }}>
               {[
                 { label: "Type de transaction", value: formatTypeDeal(opportunite.typeDeal) },
+                ...(isVente && opportunite.typeVente ? [{ label: "Type de vente", value: TYPE_VENTE_LABELS[opportunite.typeVente] || opportunite.typeVente }] : []),
+                ...(isVente && opportunite.montantRevente ? [{ label: "Montant de revente souhaité", value: opportunite.montantRevente }] : []),
                 { label: "Province", value: opportunite.province },
                 { label: "Activités", value: opportunite.activites.join(", ") },
                 { label: "Présence du dirigeant", value: opportunite.presenceDirigeant === "OUI" ? "Oui, après la cession" : opportunite.presenceDirigeant === "OUI_PROVISOIRE" ? "Oui, provisoirement" : "Non" },

@@ -4,10 +4,15 @@ import { useRouter } from "next/navigation";
 
 const PROVINCES = ["Anvers", "Bruxelles", "Flandre orientale", "Flandre occidentale", "Brabant flamand", "Brabant wallon", "Hainaut", "Liège", "Luxembourg", "Namur", "Limbourg"];
 const ACTIVITES = ["Comptabilité", "Fiscalité", "Création d'entreprise", "Gestion salariale", "Transmission d'entreprise", "Juridique", "Autre"];
+const MONTANT_REVENTE_OPTIONS = [
+  "0 – 100 k€", "100 – 250 k€", "250 – 500 k€", "500 k€ – 1 M€",
+  "1 – 2 M€", "2 – 3 M€", "3 – 4 M€", "4 – 5 M€", "+ 5 M€",
+];
 
 const INITIAL_FORM = {
   province: "", chiffreAffaires: "", nombreClients: "", nombreCollaborateurs: "",
   activites: [], typeDeal: [], presenceDirigeant: "", description: "",
+  montantRevente: "", typeVente: "",
   utiliseBrio: null, exclusiviteCompagnie: null, nomCompagnie: "",
   venteImmeuble: null, valeurImmeuble: "", dossierDigitalise: null,
   logiciels: "",
@@ -57,7 +62,13 @@ export default function NouvelleOpportunitePage() {
     setForm(prev => ({ ...prev, activites: prev.activites.includes(act) ? prev.activites.filter(a => a !== act) : [...prev.activites, act] }));
   }
   function toggleTypeDeal(val) {
-    setForm(prev => ({ ...prev, typeDeal: prev.typeDeal.includes(val) ? prev.typeDeal.filter(v => v !== val) : [...prev.typeDeal, val] }));
+    setForm(prev => {
+      const has = prev.typeDeal.includes(val);
+      const typeDeal = has ? prev.typeDeal.filter(v => v !== val) : [...prev.typeDeal, val];
+      // Si on décoche VENTE, on réinitialise les champs spécifiques vente
+      const extra = (val === "VENTE" && has) ? { montantRevente: "", typeVente: "" } : {};
+      return { ...prev, typeDeal, ...extra };
+    });
   }
   function setBool(field, val) { setForm(prev => ({ ...prev, [field]: val })); }
   function addAdresse() { setForm(prev => ({ ...prev, adressesComplementaires: [...prev.adressesComplementaires, ""] })); }
@@ -67,6 +78,8 @@ export default function NouvelleOpportunitePage() {
   function removeAdresse(idx) {
     setForm(prev => ({ ...prev, adressesComplementaires: prev.adressesComplementaires.filter((_, i) => i !== idx) }));
   }
+
+  const isVente = form.typeDeal.includes("VENTE");
 
   function handleReset() {
     if (window.confirm("Effacer tout le formulaire ? Cette action est irréversible.")) {
@@ -90,6 +103,9 @@ export default function NouvelleOpportunitePage() {
         nombreClients: parseInt(form.nombreClients),
         nombreCollaborateurs: parseInt(form.nombreCollaborateurs),
         valeurImmeuble: form.venteImmeuble === true && form.valeurImmeuble ? parseInt(form.valeurImmeuble) : null,
+        // Champs spécifiques VENTE : envoyés seulement si VENTE est coché
+        montantRevente: isVente && form.montantRevente ? form.montantRevente : null,
+        typeVente: isVente && form.typeVente ? form.typeVente : null,
         caIard: null, caVie: null, caCreditImmo: null, caCreditTempo: null, caPlacement: null, caBanque: null,
         adressesComplementaires: form.adressesComplementaires.filter(a => a.trim() !== ""),
       }),
@@ -129,8 +145,9 @@ export default function NouvelleOpportunitePage() {
   );
 
   const isFormValid = form.province && form.chiffreAffaires && form.nombreClients && form.nombreCollaborateurs && form.typeDeal.length > 0 && form.presenceDirigeant && form.activites.length > 0;
-  const typeDealLabels = { VENTE: "Vente", FUSION: "Fusion", OUVERTURE_CAPITAL: "Ouverture du capital", COLLABORATION: "Collaboration" };
+  const typeDealLabels = { VENTE: "Vente", FUSION: "Fusion", OUVERTURE_CAPITAL: "Ouverture du capital", COLLABORATION: "Collaboration", LIQUIDATION: "Liquidation" };
   const presenceLabels = { OUI: "Oui", OUI_PROVISOIRE: "Provisoire", NON: "Non" };
+  const typeVenteLabels = { ACTION: "Vente d'actions", FONDS_DE_COMMERCE: "Vente de fonds de commerce" };
 
   return (
     <div style={{ maxWidth: "100%" }}>
@@ -145,6 +162,7 @@ export default function NouvelleOpportunitePage() {
           .nouv-chiffres-grid { grid-template-columns: 1fr 1fr !important; }
           .nouv-transaction-grid { grid-template-columns: 1fr 1fr !important; }
           .nouv-presence-grid { grid-template-columns: 1fr 1fr 1fr !important; }
+          .nouv-vente-grid { grid-template-columns: 1fr !important; }
           .nouv-submit-mobile { display: flex !important; }
           .nouv-reset-mobile { display: flex !important; }
           .nouv-header h1 { font-size: 20px !important; }
@@ -275,6 +293,7 @@ export default function NouvelleOpportunitePage() {
                   { value: "FUSION", label: "Fusion", desc: "Fusion avec un autre cabinet" },
                   { value: "OUVERTURE_CAPITAL", label: "Ouverture du capital", desc: "Entrée d'un associé financier" },
                   { value: "COLLABORATION", label: "Collaboration", desc: "Partenariat ou sous-traitance" },
+                  { value: "LIQUIDATION", label: "Liquidation", desc: "Cessation et liquidation du cabinet" },
                 ].map(opt => {
                   const selected = form.typeDeal.includes(opt.value);
                   return (
@@ -291,6 +310,47 @@ export default function NouvelleOpportunitePage() {
                   );
                 })}
               </div>
+
+              {/* Champs spécifiques VENTE (points 6 et 7) */}
+              {isVente && (
+                <div style={{ background: "#FFF7ED", border: "1px solid #FED7AA", borderRadius: 12, padding: "16px", marginBottom: 20 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#EA580C" strokeWidth="2" style={{ flexShrink: 0 }}><path d="M3 3v18h18"/><path d="M18 9l-6 6-3-3-3 3"/></svg>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: "#C2410C", textTransform: "uppercase", letterSpacing: "0.04em" }}>Détails de la vente</span>
+                  </div>
+                  <div className="nouv-vente-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+                    <div>
+                      <label style={labelStyle}>Montant de revente souhaité</label>
+                      <CustomSelect
+                        value={form.montantRevente}
+                        onChange={val => setForm({ ...form, montantRevente: val })}
+                        options={MONTANT_REVENTE_OPTIONS}
+                        placeholder="Sélectionner une tranche"
+                      />
+                    </div>
+                    <div>
+                      <label style={labelStyle}>Type de vente</label>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                        {[
+                          { value: "ACTION", label: "Vente d'actions" },
+                          { value: "FONDS_DE_COMMERCE", label: "Vente de fonds de commerce" },
+                        ].map(opt => {
+                          const sel = form.typeVente === opt.value;
+                          return (
+                            <button key={opt.value} type="button" onClick={() => setForm({ ...form, typeVente: opt.value })}
+                              style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", borderRadius: 10, cursor: "pointer", textAlign: "left", border: `1.5px solid ${sel ? "#FF5A1F" : "#E5E7EB"}`, background: sel ? "rgba(255,90,31,0.08)" : "#fff", transition: "all 0.15s" }}>
+                              <div style={{ width: 16, height: 16, borderRadius: "50%", border: `2px solid ${sel ? "#FF5A1F" : "#D1D5DB"}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                                {sel && <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#FF5A1F" }} />}
+                              </div>
+                              <span style={{ fontSize: 13, fontWeight: 600, color: sel ? "#C2410C" : "#374151" }}>{opt.label}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <label style={labelStyle}>Présence du dirigeant après la cession *</label>
               <div className="nouv-presence-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
@@ -381,6 +441,8 @@ export default function NouvelleOpportunitePage() {
                   { label: "Clients", value: form.nombreClients || "—" },
                   { label: "Collaborateurs", value: form.nombreCollaborateurs || "—" },
                   { label: "Transaction", value: form.typeDeal.length > 0 ? form.typeDeal.map(t => typeDealLabels[t]).join(", ") : "—" },
+                  ...(isVente && form.montantRevente ? [{ label: "Revente souhaitée", value: form.montantRevente }] : []),
+                  ...(isVente && form.typeVente ? [{ label: "Type de vente", value: typeVenteLabels[form.typeVente] }] : []),
                   { label: "Dirigeant", value: presenceLabels[form.presenceDirigeant] || "—" },
                   ...(form.venteImmeuble === true && form.valeurImmeuble ? [{ label: "Immobilier", value: `${parseInt(form.valeurImmeuble).toLocaleString("fr-BE")} €` }] : []),
                   { label: "Digitalisé", value: form.dossierDigitalise === true ? "Oui" : form.dossierDigitalise === false ? "Non" : "—" },

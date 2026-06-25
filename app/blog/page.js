@@ -1,7 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import Image from "next/image";
 import PublicNav from "@/app/components/PublicNav";
 import PublicFooter from "@/app/components/PublicFooter";
+
+export const dynamic = "force-dynamic";
 
 export default async function BlogPage() {
   const articles = await prisma.article.findMany({
@@ -22,10 +25,13 @@ export default async function BlogPage() {
         .blog-card:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.08); transform: translateY(-2px); }
       `}</style>
 
-      <PublicNav />
+      <PublicNav dark />
 
-      {/* Hero */}
+      {/* Hero avec image de fond + overlay */}
       <div className="blog-hero" style={{ background: "#141414", padding: "120px 48px 64px", textAlign: "center", position: "relative", overflow: "hidden" }}>
+        <Image src="/images/hero-bg.jpg" alt="" fill priority sizes="100vw"
+          style={{ objectFit: "cover", objectPosition: "center 30%" }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(20,20,20,0.92) 0%, rgba(20,20,20,0.86) 100%)" }} />
         <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: 600, height: 400, borderRadius: "50%", background: "radial-gradient(ellipse, rgba(255,90,31,0.07) 0%, transparent 70%)", pointerEvents: "none" }} />
         <div style={{ position: "relative", zIndex: 1 }}>
           <p style={{ fontSize: 11, fontWeight: 700, color: "#FF5A1F", letterSpacing: "0.1em", margin: "0 0 14px" }}>BLOG</p>

@@ -72,8 +72,8 @@ export default async function AdminAcheteurs({ searchParams }) {
 
       {/* TABLE DESKTOP */}
       <div className="adm-ach-table" style={{ background: "#fff", borderRadius: 16, border: "1px solid #F3F4F6", overflow: "visible" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 110px 90px 90px 110px 56px", padding: "10px 24px", background: "#F9FAFB", borderBottom: "1px solid #F3F4F6" }}>
-          {["Email", "Abonnement", "Dossiers", "Alertes", "Inscription", ""].map((h, i) => (
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 150px 100px 80px 80px 100px 56px", padding: "10px 24px", background: "#F9FAFB", borderBottom: "1px solid #F3F4F6" }}>
+          {["Email", "N° entreprise", "Abonnement", "Dossiers", "Alertes", "Inscription", ""].map((h, i) => (
             <span key={i} style={{ fontSize: 11, fontWeight: 600, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</span>
           ))}
         </div>
@@ -82,8 +82,11 @@ export default async function AdminAcheteurs({ searchParams }) {
             <p style={{ fontSize: 14, color: "#6B7280", margin: 0 }}>Aucun acheteur trouvé.</p>
           </div>
         ) : filtered.map((a, i) => (
-          <div key={a.id} style={{ display: "grid", gridTemplateColumns: "1fr 110px 90px 90px 110px 56px", padding: "14px 24px", borderBottom: i < filtered.length - 1 ? "1px solid #F9FAFB" : "none", alignItems: "center" }}>
+          <div key={a.id} style={{ display: "grid", gridTemplateColumns: "1fr 150px 100px 80px 80px 100px 56px", padding: "14px 24px", borderBottom: i < filtered.length - 1 ? "1px solid #F9FAFB" : "none", alignItems: "center" }}>
             <div style={{ fontSize: 13, fontWeight: 500, color: "#141414", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.user.email}</div>
+            <div style={{ fontSize: 12, color: a.numeroEntreprise ? "#374151" : "#D1D5DB", fontFamily: a.numeroEntreprise ? "monospace" : "inherit", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {a.numeroEntreprise || "—"}
+            </div>
             <div>
               <span style={{ padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 600, background: a.subStatus === "active" ? "#F0FDF4" : a.subStatus === "past_due" ? "#FEF3C7" : "#F9FAFB", color: a.subStatus === "active" ? "#10B981" : a.subStatus === "past_due" ? "#D97706" : "#6B7280" }}>
                 {a.subStatus === "active" ? "Actif" : a.subStatus === "past_due" ? "Retard" : a.subStatus === "canceled" ? "Annulé" : "Inactif"}
@@ -111,12 +114,17 @@ export default async function AdminAcheteurs({ searchParams }) {
           </div>
         ) : filtered.map((a) => (
           <div key={a.id} style={{ background: "#fff", borderRadius: 14, border: "1px solid #F3F4F6", padding: "16px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
               <div style={{ fontSize: 13, fontWeight: 600, color: "#141414", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, marginRight: 10 }}>{a.user.email}</div>
               <span style={{ padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 600, flexShrink: 0, background: a.subStatus === "active" ? "#F0FDF4" : a.subStatus === "past_due" ? "#FEF3C7" : "#F9FAFB", color: a.subStatus === "active" ? "#10B981" : a.subStatus === "past_due" ? "#D97706" : "#6B7280" }}>
                 {a.subStatus === "active" ? "Actif" : a.subStatus === "past_due" ? "Retard" : a.subStatus === "canceled" ? "Annulé" : "Inactif"}
               </span>
             </div>
+            {a.numeroEntreprise && (
+              <div style={{ fontSize: 11, color: "#6B7280", fontFamily: "monospace", marginBottom: 12 }}>
+                N° {a.numeroEntreprise}
+              </div>
+            )}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
               {[
                 { label: "Dossiers", value: a.deblocages.length },

@@ -81,6 +81,7 @@ model Acheteur {
   // Profil étendu
   nomBureau        String?
   nomCEO           String?
+  numeroEntreprise String?
   telephone        String?
   adresse          String?
   siteInternet     String?

@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import AdminOpportuniteToggle from "../AdminOpportuniteToggle";
 import AdminFilters from "../AdminFilters";
 
@@ -35,6 +36,12 @@ export default async function AdminOpportunites({ searchParams }) {
     CLOSED: { background: "#F9FAFB", color: "#6B7280" },
   };
   const statusLabel = { PENDING: "À valider", ACTIVE: "En ligne", HIDDEN: "Masquée", CLOSED: "Clôturée" };
+
+  const editBtnStyle = {
+    display: "inline-flex", alignItems: "center", gap: 5, padding: "6px 12px",
+    borderRadius: 8, background: "#141414", color: "#fff", fontSize: 12, fontWeight: 600,
+    textDecoration: "none", whiteSpace: "nowrap",
+  };
 
   return (
     <div style={{ maxWidth: "100%" }}>
@@ -77,7 +84,7 @@ export default async function AdminOpportunites({ searchParams }) {
 
       {/* TABLE DESKTOP */}
       <div className="adm-opp-table" style={{ background: "#fff", borderRadius: 16, border: "1px solid #F3F4F6", overflow: "hidden" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 100px 120px 100px 180px", padding: "10px 24px", background: "#F9FAFB", borderBottom: "1px solid #F3F4F6" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 100px 120px 100px 230px", padding: "10px 24px", background: "#F9FAFB", borderBottom: "1px solid #F3F4F6" }}>
           {["Province / Type", "Commissions", "Activités", "Statut", "Actions"].map(h => (
             <span key={h} style={{ fontSize: 11, fontWeight: 600, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</span>
           ))}
@@ -87,7 +94,7 @@ export default async function AdminOpportunites({ searchParams }) {
             <p style={{ fontSize: 14, color: "#6B7280", margin: 0 }}>Aucune opportunité.</p>
           </div>
         ) : opportunites.map((opp, i) => (
-          <div key={opp.id} style={{ display: "grid", gridTemplateColumns: "1fr 100px 120px 100px 180px", padding: "14px 24px", borderBottom: i < opportunites.length - 1 ? "1px solid #F9FAFB" : "none", alignItems: "center" }}>
+          <div key={opp.id} style={{ display: "grid", gridTemplateColumns: "1fr 100px 120px 100px 230px", padding: "14px 24px", borderBottom: i < opportunites.length - 1 ? "1px solid #F9FAFB" : "none", alignItems: "center" }}>
             <div>
               <div style={{ fontSize: 13, fontWeight: 600, color: "#141414" }}>{opp.province}</div>
               <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 2 }}>
@@ -101,7 +108,13 @@ export default async function AdminOpportunites({ searchParams }) {
                 {statusLabel[opp.status]}
               </span>
             </div>
-            <AdminOpportuniteToggle id={opp.id} currentStatus={opp.status} />
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <Link href={`/dashboard/admin/opportunites/${opp.id}`} style={editBtnStyle}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                Éditer
+              </Link>
+              <AdminOpportuniteToggle id={opp.id} currentStatus={opp.status} />
+            </div>
           </div>
         ))}
       </div>
@@ -138,7 +151,13 @@ export default async function AdminOpportunites({ searchParams }) {
               ))}
             </div>
             <div style={{ fontSize: 11, color: "#9CA3AF", marginBottom: 10 }}>{opp.vendeur?.user?.email}</div>
-            <AdminOpportuniteToggle id={opp.id} currentStatus={opp.status} />
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <Link href={`/dashboard/admin/opportunites/${opp.id}`} style={{ ...editBtnStyle, flex: 1, justifyContent: "center", padding: "9px 12px", fontSize: 13 }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                Éditer
+              </Link>
+              <AdminOpportuniteToggle id={opp.id} currentStatus={opp.status} />
+            </div>
           </div>
         ))}
       </div>

@@ -9,7 +9,7 @@ export default async function ProfilAcheteurPage() {
   const acheteur = await prisma.acheteur.findUnique({
     where: { userId: session.user.id },
     select: {
-      nomBureau: true, nomCEO: true, telephone: true, adresse: true,
+      nomBureau: true, nomCEO: true, numeroEntreprise: true, telephone: true, adresse: true,
       siteInternet: true, chiffreAffaires: true, nombreClients: true,
       nombreCollaborateurs: true, activites: true,
     },

@@ -4,6 +4,8 @@ import Link from "next/link";
 import PublicNav from "@/app/components/PublicNav";
 import PublicFooter from "@/app/components/PublicFooter";
 
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata({ params }) {
   const { slug } = await params;
   const article = await prisma.article.findUnique({ where: { slug } });
@@ -46,7 +48,7 @@ export default async function ArticlePage({ params }) {
         .article-content hr { border: none; border-top: 1px solid #F3F4F6; margin: 28px 0; }
       `}</style>
 
-      <PublicNav />
+      <PublicNav dark />
 
       {/* Header article */}
       <div className="article-header" style={{ background: "#141414", padding: "120px 48px 48px", position: "relative", overflow: "hidden" }}>

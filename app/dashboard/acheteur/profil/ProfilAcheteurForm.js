@@ -7,6 +7,7 @@ export default function ProfilAcheteurForm({ initialData, email }) {
   const [form, setForm] = useState({
     nomBureau: initialData?.nomBureau || "",
     nomCEO: initialData?.nomCEO || "",
+    numeroEntreprise: initialData?.numeroEntreprise || "",
     telephone: initialData?.telephone || "",
     adresse: initialData?.adresse || "",
     siteInternet: initialData?.siteInternet || "",
@@ -129,12 +130,22 @@ export default function ProfilAcheteurForm({ initialData, email }) {
 
         <div className="profil-grid2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
           <div>
+            <label style={labelStyle}>Numéro d'entreprise (BCE/TVA)</label>
+            <input type="text" value={form.numeroEntreprise} onChange={e => setForm({ ...form, numeroEntreprise: e.target.value })}
+              placeholder="BE 0123.456.789" style={inputStyle}
+              onFocus={e => e.target.style.borderColor = "#FF5A1F"}
+              onBlur={e => e.target.style.borderColor = "#E5E7EB"} />
+          </div>
+          <div>
             <label style={labelStyle}>Téléphone</label>
             <input type="text" value={form.telephone} onChange={e => setForm({ ...form, telephone: e.target.value })}
               placeholder="+32 456 78 90 12" style={inputStyle}
               onFocus={e => e.target.style.borderColor = "#FF5A1F"}
               onBlur={e => e.target.style.borderColor = "#E5E7EB"} />
           </div>
+        </div>
+
+        <div className="profil-grid2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
           <div>
             <label style={labelStyle}>Site internet</label>
             <input type="text" value={form.siteInternet} onChange={e => setForm({ ...form, siteInternet: e.target.value })}
@@ -142,14 +153,13 @@ export default function ProfilAcheteurForm({ initialData, email }) {
               onFocus={e => e.target.style.borderColor = "#FF5A1F"}
               onBlur={e => e.target.style.borderColor = "#E5E7EB"} />
           </div>
-        </div>
-
-        <div>
-          <label style={labelStyle}>Adresse</label>
-          <input type="text" value={form.adresse} onChange={e => setForm({ ...form, adresse: e.target.value })}
-            placeholder="Rue Exemple 1, 1000 Bruxelles" style={inputStyle}
-            onFocus={e => e.target.style.borderColor = "#FF5A1F"}
-            onBlur={e => e.target.style.borderColor = "#E5E7EB"} />
+          <div>
+            <label style={labelStyle}>Adresse</label>
+            <input type="text" value={form.adresse} onChange={e => setForm({ ...form, adresse: e.target.value })}
+              placeholder="Rue Exemple 1, 1000 Bruxelles" style={inputStyle}
+              onFocus={e => e.target.style.borderColor = "#FF5A1F"}
+              onBlur={e => e.target.style.borderColor = "#E5E7EB"} />
+          </div>
         </div>
       </div>
 

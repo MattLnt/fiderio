@@ -12,7 +12,7 @@ export async function GET(req) {
     const acheteur = await prisma.acheteur.findUnique({
       where: { userId: session.user.id },
       select: {
-        nomBureau: true, nomCEO: true, telephone: true, adresse: true,
+        nomBureau: true, nomCEO: true, numeroEntreprise: true, telephone: true, adresse: true,
         siteInternet: true, chiffreAffaires: true, nombreClients: true,
         nombreCollaborateurs: true, activites: true, alertesEmail: true,
         subStatus: true,
@@ -36,6 +36,7 @@ export async function PUT(req) {
       data: {
         nomBureau: body.nomBureau || null,
         nomCEO: body.nomCEO || null,
+        numeroEntreprise: body.numeroEntreprise || null,
         telephone: body.telephone || null,
         adresse: body.adresse || null,
         siteInternet: body.siteInternet || null,
